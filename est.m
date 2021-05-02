@@ -34,18 +34,18 @@ params.w_us = 1;
 % Unknowns
 % w_i: x(1) ^ 2, w_j: x(2) ^ 2
 % M_d_i: x(3) ^ 2, M_d_j: x(4) ^ 2, M_u_i: x(5) ^ 2, M_u_j: x(6) ^ 2
-% T_i: x(7)^2, T_j: x(8)^2
+% c_ji: x(7) ^ 2, c_jj: x(8) ^ 2, c_ij: x(9) ^ 2, c_ii: x(10) ^ 2
 
 % Set initial guesses and optimize
 % rng("default");
-x0 = unifrnd(0, 1, [8, 1]);  % Vector of unknowns
+x0 = unifrnd(0, 1, [10, 1]);  % Vector of unknowns
 
 % Set optimization options
 alg0 = "trust-region-dogleg";
 alg1 = "trust-region";
 alg2 = "levenberg-marquardt";
-opt = optimset("Algorithm", alg0, "Display", "iter", "MaxFunEvals", 1e10, ...
-    "MaxIter", 1e10, "TolX", 1e-6, "TolFun", 1e-6, "Diagnostics", "on");
+opt = optimset("Algorithm", alg0, "Display", "iter", "MaxFunEvals", 1e5, ...
+    "MaxIter", 1e5, "TolX", 1e-6, "TolFun", 1e-6, "Diagnostics", "on");
 
 x = fsolve(@(x)solve_eq(params, x), x0, opt);
 disp(x .^ 2);

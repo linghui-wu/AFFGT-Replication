@@ -39,7 +39,7 @@ tau_d = params.tau_d;
 tau_u = params.tau_u;
 
 % Wages: normalize US wage to 1
-% w_i = params.w_us;
+% x(1) ^ 2 = params.w_us;
 
 % Taxes (t_s_ij rep'ts tax by country j on goods from country i sector s)
 % Assumes no tariffs on US goods in baseline
@@ -129,15 +129,6 @@ x_jj = Q_u_jj * ((1 + t_u_jj) * p_u_jj / P_u_jj) ^ (-theta);
 x_ij = Q_u_ij * ((1 + t_u_ij) * p_u_ij / P_u_ij) ^ (-theta);
 x_ii = Q_u_ii * ((1 + t_u_ii) * p_u_ii / P_u_ii) ^ (-theta);
 
-% Output in downstream sectors
-% ?????????? Currently no tax revenues included
-% x(7) ^ 2 = 0;
-% x(8) ^ 2 = 0;
-c_ji = (x(1) ^ 2 * L_i + x(7) ^ 2) * ((1 + t_d_ji) * p_d_ji) ^ (-sigma) / P_d_i ^ (1 - sigma);
-c_jj = (x(2) ^ 2 * L_j + x(8) ^ 2) * ((1 + t_d_jj) * p_d_jj) ^ (-sigma) / P_d_j ^ (1 - sigma);
-c_ij = (x(2) ^ 2 * L_j + x(8) ^ 2) * ((1 + t_d_ij) * p_d_ij) ^ (-sigma) / P_d_j ^ (1 - sigma);
-c_ii = (x(1) ^ 2 * L_i + x(7) ^ 2) * ((1 + t_d_ii) * p_d_ii) ^ (-sigma) / P_d_i ^ (1 - sigma);
-
 
 %% Equilibrium conditions
 
@@ -148,27 +139,35 @@ LMC_j = L_j - x(6) ^ 2 * l_d_j - x(4) ^ 2 * l_u_j;
 % Goods market clearing
 GMC_u_i = y_u_i - x(5) ^ 2 * x_ii - x(6) ^ 2 * tau_u * x_ij;
 GMC_u_j = y_u_j - x(6) ^ 2 * x_jj - x(5) ^ 2 * tau_u * x_ji;
-GMC_d_i = y_d_i - c_ii - tau_d * c_ji;
-GMC_d_j = y_d_j - c_jj - tau_d * c_ij;
+GMC_d_i = y_d_i - x(10) ^ 2 - tau_d * x(7) ^ 2;
+GMC_d_j = y_d_j - x(8) ^ 2 - tau_d * x(9) ^ 2;
+
+% Output clearing in downstream sectors 
+% ?????????? Currently no tax revenues included
+T_i = 0;
+T_j = 0;
+OC_ji = x(7) ^ 2 - (x(1) ^ 2 * L_i + T_i) * ((1 + t_d_ji) * p_d_ji) ^ (-sigma) / P_d_i ^ (1 - sigma);
+OC_jj = x(8) ^ 2 - (x(2) ^ 2 * L_j + T_j) * ((1 + t_d_jj) * p_d_jj) ^ (-sigma) / P_d_j ^ (1 - sigma);
+OC_ij = x(9) ^ 2 - (x(2) ^ 2 * L_j + T_j) * ((1 + t_d_ij) * p_d_ij) ^ (-sigma) / P_d_j ^ (1 - sigma);
+OC_ii = x(10) ^ 2 - (x(1) ^ 2 * L_i + T_i) * ((1 + t_d_ii) * p_d_ii) ^ (-sigma) / P_d_i ^ (1 - sigma);
 
 % Buget balance in country i and j
-BB_i = x(7) ^ 2  - ... 
-     (t_d_ii * x(3) ^ 2 * c_ii * p_d_ii + ...
-     t_u_ii * x(3) ^ 2 * x(5) ^ 2 * x_ii * p_u_ii - ...
-     v_d_ii * x(3) ^ 2 * c_ii * p_d_ii - ...
-     v_u_ii * x(5) ^ 2 * x(6) ^ 2 * x_ii * p_u_ii + ...
-     t_d_ji * x(4) ^ 2 * c_ji * p_d_ji + ...
-     t_u_ji * x(3) ^ 2 * x(6) ^ 2 * x_ji * p_u_ji - ...
-     v_d_ji * x(3) ^ 2 * c_ij * p_d_ij - ...
-     v_u_ij * x(4) ^ 2 * x(6) ^ 2 * x_ij * p_u_ij);
-BB_j = x(8) ^ 2; % - ...
+% BB_i = T_i  - ... 
+%      (t_d_ii * x(3) ^ 2 * x(10) ^ 2 * p_d_ii + ...
+%      t_u_ii * x(3) ^ 2 * x(5) ^ 2 * x_ii * p_u_ii - ...
+%      v_d_ii * x(3) ^ 2 * x(10) ^ 2 * p_d_ii - ...
+%      v_u_ii * x(5) ^ 2 * x(6) ^ 2 * x_ii * p_u_ii + ...
+%      t_d_ji * x(4) ^ 2 * x(7) ^ 2 * p_d_ji + ...
+%      t_u_ji * x(3) ^ 2 * x(6) ^ 2 * x_ji * p_u_ji - ...
+%      v_d_ji * x(3) ^ 2 * x(9) ^ 2 * p_d_ij - ...
+%      v_u_ij * x(4) ^ 2 * x(6) ^ 2 * x_ij * p_u_ij);
+% BB_j = T_j; % - ...
 %     (8 terms all equal to 0)
 
 eq = [LMC_i, LMC_j, ...
     GMC_u_i, GMC_u_j, GMC_d_i, GMC_d_j, ...
-    BB_i, BB_j];
+    OC_ji, OC_jj, OC_ij, OC_ii];
 
-disp("**************");
-disp(eq);
+% disp(eq);
 
 end
