@@ -145,11 +145,11 @@ c_ii = (w_i * L_i + T_i) * ((1 + t_d_ii) * p_d_ii) ^ (-sigma) / P_d_i ^ (1 - sig
 LMC_i = L_i - M_d_i * l_d_i - M_u_i * l_u_i;
 LMC_j = L_j - M_d_j * l_d_j - M_u_j * l_u_j;
 
-% Goods market clearing
+% Goods market clearinge
 GMC_d_i = y_d_i - c_ii - tau_d * c_ji;
 GMC_d_j = y_d_j - c_jj - tau_d * c_ij;
-GMC_u_i = y_u_i - M_d_i * x_ii - M_d_j * tau_u * x_ij;
-GMC_u_j = y_u_j - M_d_j * x_jj - M_d_i * tau_u * x_ji;
+GMC_u_i = y_u_i - M_d_i * x_ii - M_d_j * tau_u * x_ji;
+GMC_u_j = y_u_j - M_d_j * x_jj - M_d_i * tau_u * x_ij;
 
 % Buget balance in country i and j
 % BB_i = T_i  - ... 
@@ -164,10 +164,19 @@ GMC_u_j = y_u_j - M_d_j * x_jj - M_d_i * tau_u * x_ji;
 % BB_j = T_j; % - ...
 %     (8 terms all equal to 0)
 
+% Output clearing in downstream sectors 
+% ?????????? Currently no tax revenues included
+% T_i = 0;
+% T_j = 0;
+% OC_ji = c_ji - (w_i * L_i + T_i) * ((1 + t_d_ji) * p_d_ji) ^ (-sigma) / P_d_i ^ (1 - sigma);
+% OC_jj = c_jj - (w_j * L_j + T_j) * ((1 + t_d_jj) * p_d_jj) ^ (-sigma) / P_d_j ^ (1 - sigma);
+% OC_ij = c_ij - (w_j * L_j + T_j) * ((1 + t_d_ij) * p_d_ij) ^ (-sigma) / P_d_j ^ (1 - sigma);
+% OC_ii = c_ii - (w_i * L_i + T_i) * ((1 + t_d_ii) * p_d_ii) ^ (-sigma) / P_d_i ^ (1 - sigma);
+
 eq = [LMC_i, LMC_j, ...
     GMC_u_i, GMC_u_j, GMC_d_i, GMC_d_j, ...
     T_i, T_j];
 
-% disp(eq);
+disp(eq);
 
 end
