@@ -42,15 +42,21 @@ params.w_us = 1;
 
 % Set initial guesses and optimize
 % rng("default");
-x0 = unifrnd(0, 1, [9, 1]);  % Vector of unknowns
+x0 = unifrnd(0, 1, [8, 1]);  % Vector of unknowns
 
 % Set optimization options
 alg0 = "trust-region-dogleg";
 alg1 = "trust-region";
 alg2 = "levenberg-marquardt";
-opt = optimset("Algorithm", alg2, "Display", "iter", "MaxFunEvals", 1e5, ...
-    "MaxIter", 1e5, "TolX", 1e-6, "TolFun", 1e-6, "Diagnostics", "off");
+opt = optimset("Algorithm", alg0, "Display", "off", "MaxFunEvals", 3e5, ...
+    "MaxIter", 3e5, "TolX", 1e-6, "TolFun", 1e-6, "Diagnostics", "on");
 
 x = fsolve(@(x)solve_eq(params, x), x0, opt);
-disp(x .^ 2);
+x_squared = x .^ 2;
+disp(x_squared);
+
+% Eight params: M's converge
+% w_i: x(1) ^ 2, w_j: x(2) ^ 2
+% M_u_i: x(3) ^ 2, M_u_j: x(4) ^ 2, M_d_i: x(5) ^ 2, M_d_j: x(6) ^ 2
+% t_i: x(7) ^ 2, T_j: x(8) ^ 2
 
