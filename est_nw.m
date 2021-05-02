@@ -30,23 +30,23 @@ params.w_us = 1;
 
 %% Solve for equilibrium allocation
 
-% Eight unknown params
-% w_i: x(1) ^ 2, w_j: x(2) ^ 2
-% M_u_i: x(3) ^ 2, M_u_j: x(4) ^ 2, M_d_i: x(5) ^ 2, M_d_j: x(6) ^ 2
-% T_i: x(7) ^ 2, T_j: x(8) ^ 2
+% Seven unknown params
+% w_j: x(1) ^ 2
+% M_u_i: x(2) ^ 2, M_u_j: x(3) ^ 2, M_d_i: x(4) ^ 2, M_d_j: x(5) ^ 2
+% T_i: x(6) ^ 2, T_j: x(7) ^ 2
 
 % Set initial guesses and optimize
 % rng("default");
-x0 = unifrnd(0, 1, [8, 1]);  % Vector of unknowns
+x0 = unifrnd(0, 1, [7, 1]);  % Vector of unknowns
 
 % Set optimization options
 alg0 = "trust-region-dogleg";
 alg1 = "trust-region";
 alg2 = "levenberg-marquardt";
-opt = optimset("Algorithm", alg0, "Display", "off", "MaxFunEvals", 2e3, ...
-    "MaxIter", 2e3, "TolX", 1e-6, "TolFun", 1e-6, "Diagnostics", "on");
+opt = optimset("Algorithm", alg2, "Display", "off", "MaxFunEvals", 1e4, ...
+    "MaxIter", 1e4, "TolX", 1e-6, "TolFun", 1e-6, "Diagnostics", "off");
 
-[x, fval, exitflag, output] = fsolve(@(x)solve_eq(params, x), x0, opt);
+[x, fval, exitflag, output] = fsolve(@(x)solve_eq_nw(params, x), x0, opt);
 x_squared = x .^ 2;
 
 disp("**********");
@@ -55,9 +55,8 @@ disp(x_squared);
 
 
 %% Print equilibrium
-% disp(["Wages", reshape(x_squared(1:2), [1, 2])]);
-% disp(["Measure of firms ", reshape(x_squared(3:6), [1, 4])]);
-% disp(["Tax revenues", reshape(x_squared(7:8), [1, 2])])
-
+% disp(["Wages", x_squared(1)]);
+% disp(["Measure of firms ", reshape(x_squared(2:5), [1, 4])]);
+% disp(["Tax revenues", reshape(x_squared(6:7), [1, 2])])
 
 
