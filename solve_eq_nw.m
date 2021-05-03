@@ -128,7 +128,7 @@ x_ij = Q_u_ij * ((1 + t_u_ij) * p_u_ij / P_u_ij) ^ (-theta);
 x_ii = Q_u_ii * ((1 + t_u_ii) * p_u_ii / P_u_ii) ^ (-theta);
 
 % Output in downstream sectors 
-% ?????????? Currently no tax revenues included
+% Currently no tax revenues included
 % x(6) ^ 2 = 0;
 % x(7) ^ 2 = 0;
 c_ji = (w_i * L_i + x(6) ^ 2) * ((1 + t_d_ji) * p_d_ji) ^ (-sigma) / P_d_i ^ (1 - sigma);
