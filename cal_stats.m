@@ -1,4 +1,4 @@
-function mae = cal_mae(x, params)
+function stats = cal_stats(x, params)
 %% Calcutes the maximum absolute error given the optimized params
 % Retrieve values of optimized params
 if length(x) == 7
@@ -116,46 +116,22 @@ BB_i = T_i;
 BB_j = T_j;
 eq = [LMC_j, LMC_i, GMC_u_i, GMC_u_j, GMC_d_i, GMC_d_j, BB_i, BB_j];
 
+%% Calculate and compare summary statistics
 
-%% Targeted moments in Table 2
-% Sales share to US from US in final goods
-ss_d_ii = c_ii * p_d_ii * M_d_i / (c_ii * p_d_ii * M_d_i + c_ij * p_d_ij * M_d_i);
-% Sales share to RoW from RoW in final goods
-ss_d_jj = c_jj * p_d_jj * M_d_j / (c_jj * p_d_jj * M_d_j + c_ji * p_d_ji * M_d_j);
-% Sales share to US from US in int. goods
-ss_u_ii = x_ii * p_u_ii * M_u_i / (x_ii * p_u_ii * M_u_i + x_ij * p_u_ij * M_u_i);
-% Sales share to RoW from RoW in int. goods
-ss_u_jj = x_jj * p_u_jj * M_u_j / (x_jj * p_u_jj * M_u_j + x_ji * p_u_ji * M_u_j);
-% Expenditure share in US final goods for the US
-es_d_ii = c_ii * p_d_ii * M_d_i / (c_ii * p_d_ii * M_d_i + c_ji * p_d_ji * (1 + t_d_ji) * M_d_j);
-% Expenditure share in RoW final goods for the RoW
-es_d_jj = c_jj * p_d_jj * M_d_j / (c_jj * p_d_jj * M_d_j + c_ij * p_d_ij * (1 + t_d_ji) * M_d_i);
-% Expenditure share in US int. goods for the US
-es_u_ii = c_ii * p_u_ii * M_d_i / (c_ii * p_u_ii * M_d_i + c_ji * p_u_ji * (1 + t_u_ji) * M_d_j);
-% Expenditure share in RoW int. goods for the RoW
-es_u_jj = c_jj * p_u_jj * M_d_j / (c_jj * p_u_jj * M_d_j + c_ij * p_u_ij * (1 + t_u_ji) * M_d_i);
-% Total US sales (int. goods) to total US expenditure (final goods)
-ts_u_ii = (c_ii * p_u_ii * M_d_i + c_ij * p_u_ij * M_d_i) / ...
-    (c_ii * p_d_ii * M_d_i + c_ji * p_d_ji * (1 + t_d_ji) * M_d_j);
-% Total RoW sales (int. goods) to total RoW expenditure (final goods)
-ts_u_jj = (c_jj * p_u_jj * M_d_j + c_ji * p_u_ji * M_d_j) / ...
-    (c_jj * p_d_jj * M_d_j + c_ij * p_d_ij * (1 + t_d_ij) * M_d_i);
-% Total US sales (final goods) to total US expenditure (final goods)
-% ts_d_ii = (x_ii * p_d_ii * M_u_i + x_ij * p_d_ij * M_u_i) / ...
-%     (c_ii * p_d_ii * M_d_i + c_ji * p_d_ji * (1 + t_d_ji) * M_d_j);
-% % Total RoW sales (final goods) to total RoW expenditure (final goods)
-% ts_d_jj = (x_jj * p_d_jj * M_u_j + x_ji * p_d_ji * M_u_j) / ...
-%     (c_jj * p_d_jj * M_d_j + c_jj * p_d_ij * (1 + t_d_ij) * M_d_);
-% % Total expenditure in final goods by the US rel. to RoW
-% ts_d_ij = (c_ii * p_d_ii * M_d_i + c_ji * p_d_ji * (1 + t_d_ji) * M_d_j) / ...
-%     (c_jj * p_d_jj * M_d_j + c_ij * p_d_ij * (1 + t_d_ij) * M_d_i);
+Omega_ii = M_u_i * M_d_i * p_u_ii * x_ii / (M_d_i * (p_d_ij * c_ij + p_d_ii * c_ii));
+Omega_jj = M_u_j * M_d_j * p_u_jj * x_jj / (M_d_j * (p_d_ji * c_ji + p_d_jj * c_jj));
+Omega_ij = M_u_i * M_d_j * p_u_ij * x_ij / (M_d_j * (p_d_ji * c_ji + p_d_jj * c_jj));
+Omega_ji = M_u_j * M_d_i * p_u_ji * x_ji / (M_d_i * (p_d_ij * c_ij + p_d_ii * c_ii));
+
+b_i_i = M_d_i * p_d_ii * c_ii / (w_i * L_i);
+b_i_j = M_d_j * p_d_ji * c_ji / (w_i * L_i);
+
+lambda_d_i = M_d_i * (p_d_ii * c_ii + p_d_ij * c_ij) / (w_i * L_i);
+
+stats = [Omega_ii, Omega_ji, Omega_jj, Omega_ij, ...
+        b_i_i, b_i_j, ...
+        lambda_d_i];
 
 
-%% Max absolute error
-mae = max([abs(0.9644 - ss_d_ii), abs(0.9767 - ss_d_jj), ...
-    abs(0.9209 - ss_u_ii), abs(0.9762 - ss_u_jj), ...
-    abs(0.9342 - es_d_ii), abs(0.9862 - es_d_jj), ...
-    abs(0.9044 - es_u_ii), abs(0.9799 - es_u_jj), ...
-    abs(0.7458 - ts_u_ii), abs(1.1314 - ts_u_jj)]);
 
 end
