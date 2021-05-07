@@ -1,17 +1,9 @@
 function stats = cal_stats(x, params)
-%% Calcutes the maximum absolute error given the optimized params
+%% Computes and compares sum stats around zero-tariff equilibrium
 % Retrieve values of optimized params
-if length(x) == 7
-    % Wage is normalized
-    [w_j] = deal(x(1));
-    [M_u_i, M_u_j, M_d_i, M_d_j] = deal(x(2), x(3), x(4), x(5));
-    [T_i, T_j] = deal(x(6), x(7));
-else 
-    % Wage is not normalized
-    [w_i, w_j] = deal(x(1), x(2));
-    [M_u_i, M_u_j, M_d_i, M_d_j] = deal(x(3), x(4), x(5), x(6));
-    [T_i, T_j] = deal(x(7), x(8));
-end
+[w_j] = deal(x(1));
+[M_u_i, M_u_j, M_d_i, M_d_j] = deal(x(2), x(3), x(4), x(5));
+[T_i, T_j] = deal(x(6), x(7));
 
 % Substitution elasticities
 theta = params.theta;
@@ -102,19 +94,7 @@ c_ji = (w_i * L_i + T_i) * ((1 + t_d_ji) * p_d_ji) ^ (-sigma) / P_d_i ^ (1 - sig
 c_jj = (w_j * L_j + T_j) * ((1 + t_d_jj) * p_d_jj) ^ (-sigma) / P_d_j ^ (1 - sigma);
 c_ij = (w_j * L_j + T_j) * ((1 + t_d_ij) * p_d_ij) ^ (-sigma) / P_d_j ^ (1 - sigma);
 c_ii = (w_i * L_i + T_i) * ((1 + t_d_ii) * p_d_ii) ^ (-sigma) / P_d_i ^ (1 - sigma);
-% Labor market clearing
-LMC_i = L_i - M_d_i * l_d_i - M_u_i * l_u_i;
-LMC_j = L_j - M_d_j * l_d_j - M_u_j * l_u_j;
-% Goods market clearinge
-GMC_d_i = y_d_i - c_ii - tau_d * c_ij;
-GMC_d_j = y_d_j - c_jj - tau_d * c_ji;
-GMC_u_i = y_u_i - M_d_i * x_ii - M_d_j * tau_u * x_ij;
-GMC_u_j = y_u_j - M_d_j * x_jj - M_d_i * tau_u * x_ji;
-% Buget balance in country i and j
-% To be completed if not zero-tariff equilibrium
-BB_i = T_i;
-BB_j = T_j;
-eq = [LMC_j, LMC_i, GMC_u_i, GMC_u_j, GMC_d_i, GMC_d_j, BB_i, BB_j];
+
 
 %% Calculate and compare summary statistics
 
@@ -132,6 +112,5 @@ stats = [Omega_ii, Omega_ji, Omega_jj, Omega_ij, ...
         b_i_i, b_i_j, ...
         lambda_d_i];
 
-
-
 end
+
