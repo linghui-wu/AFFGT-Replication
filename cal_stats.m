@@ -1,5 +1,5 @@
+% Computes and compares sum stats around zero-tariff equilibrium
 function stats = cal_stats(x, params)
-%% Computes and compares sum stats around zero-tariff equilibrium
 % Retrieve values of optimized params
 [w_j] = deal(x(1));
 [M_u_i, M_u_j, M_d_i, M_d_j] = deal(x(2), x(3), x(4), x(5));
@@ -108,9 +108,31 @@ b_i_j = M_d_j * p_d_ji * c_ji / (w_i * L_i);
 
 lambda_d_i = M_d_i * (p_d_ii * c_ii + p_d_ij * c_ij) / (w_i * L_i);
 
+%% Calculate welfare
+T_ij=cal_T_ij(t_d_ji,t_u_ji,x(4)^2,x(5)^2,x(2)^2,x(3)^2,...
+    c_ij,c_ji,p_d_ij,p_d_ji,x_ij,x_ji,p_u_ij,p_u_ji,v_d_ij,v_u_ij);
+T_ii=cal_T_ij(t_d_ii,t_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
+    c_ii,c_ii,p_d_ii,p_d_ii,x_ii,x_ii,p_u_ii,p_u_ii,v_d_ii,v_u_ii);
+T_ji=cal_T_ij(t_d_ji,t_u_ji,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
+    c_ji,c_ij,p_d_ji,p_d_ij,x_ji,x_ij,p_u_ji,p_u_ij,v_d_ji,v_u_ji);
+T_jj=cal_T_ij(t_d_jj,t_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
+    c_jj,c_jj,p_d_jj,p_d_jj,x_jj,x_jj,p_u_jj,p_u_jj,v_d_jj,v_u_jj);
+
+U_i = (w_i * L_i + T_ii + T_ij) / P_d_i;
+U_j = (w_j * L_j + T_jj + T_ji) / P_d_j;
+
 stats = [Omega_ii, Omega_ji, Omega_jj, Omega_ij, ...
         b_i_i, b_i_j, ...
-        lambda_d_i];
+        lambda_d_i,...
+        U_i, U_j];
 
 end
 
+% Calculate tax revenues
+function T_ij=cal_T_ij(t_d_ji,t_u_ji,M_d_i,M_d_j,M_u_i,M_u_j,...
+    c_ij,c_ji,p_d_ij,p_d_ji,x_ij,x_ji,p_u_ij,p_u_ji,v_d_ij,v_u_ij)
+    T_ij=t_d_ji*M_d_j*c_ji*p_d_ji+...
+        t_u_ji*M_d_i*M_u_j*x_ji*p_u_ji-...
+        v_d_ij*M_d_i*c_ij*p_d_ij-...
+        v_u_ij*M_d_j*M_u_i*x_ij*p_u_ij;
+end
