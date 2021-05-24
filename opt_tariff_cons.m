@@ -119,7 +119,6 @@ c_jj=cal_c_ij(x(1)^2,L_j,x(7)^2,t_d_jj,p_d_jj,sigma,P_d_j);
 
 
 %% Equilibrium constraints
-
 % Labor market clearing
 cons(1)=cal_LMC_i(L_i,x(4)^2,l_d_i,x(2)^2,l_u_i); % LMC_i
 cons(2)=cal_LMC_i(L_j,x(5)^2,l_d_j,x(3)^2,l_u_j); % LMC_j
@@ -142,7 +141,7 @@ T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
 cons(7)=cal_BB_i(x(6)^2,T_ii,T_ji); % BB_i
 cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij); % BB_i
 
-% Function output
+%% Function output
 ceq=[];
 
 end
