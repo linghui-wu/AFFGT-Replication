@@ -3,12 +3,13 @@
 % Linghui Wu
 
 %% Housekeeping
+clc;
 clear;
 close all;
 
 
 %% Load data
-load("../AFFGT_data.mat")
+load("../data/AFFGT_data.mat")
 
 params.theta=4;
 params.sigma=4;
@@ -65,22 +66,36 @@ params.w_us = 1;
 % M_u_i: x(2)^2, M_u_j: x(3)^2, M_d_i: x(4)^2, M_d_j: x(5)^2
 % T_i: x(6)^2, T_j: x(7)^2
 % t_u_ji: x(8)^2, t_d_ji: x(9)^2;
+x0=unifrnd(0,1,[9,1]);
+opt2=optimoptions(@fmincon,"Display","off","Algorithm","SQP",...
+    "MaxIter", 1e4,"OptimalityTolerance",1e-8);
+% Non-linear constraints
+nonlcon=@(x) opt_tariff_cons(x,params);
+lb=1e-3*ones(1,9);
+ub=ones(1,9)-1e-3;
+f=@(x) solve_opt_tariff(x,params);
+problem=createOptimProblem("fmincon","objective",f,"x0",x0,"lb",lb,...
+    "ub",ub,"nonlcon",nonlcon,"options",opt2);
+gs=GlobalSearch;
+xgs=run(gs,problem);
+display(f(xgs));
+display(xgs.^2);
+% Plot the optimization figure
+x_axis=linspace(0,1,50);
+y_axis=linspace(0,1,50);
+[X,Y] = meshgrid(x_axis,y_axis);
 
-fval=0;
-% exitflag2="-1";
-cons=zeros(1,7);
-while (fval>-0.0317) || (exitflag2<0) || any(cons<=1e-3)
-    x0=unifrnd(0,1,[9,1]);
-    opt2=optimoptions(@fmincon,"Display","off","MaxIter", 1e4);
-    % Non-linear constraints
-    nonlcon=@(x) opt_tariff_cons(x,params);
-    lb=1e-3*ones(1,9);
-    ub=ones(1,9)-1e-3;
-    f=@(x) solve_opt_tariff(x,params);
-    % No other constraints: A,b,Aeq,beq=[]
-    [x,fval,exitflag2]=fmincon(f,x0,[],[],[],[],lb,ub,nonlcon,opt2);
-    cons=[x(1),x(2),x(3),x(4),x(5),x(8),x(9)].^2;
-    disp(cons);
-    disp(fval);
+[nrow,ncol]=size(Y);
+Z=ones(nrow,ncol);
+for r = 1:nrow
+   for c = 1:ncol
+%        disp("*******")
+%        disp(X(r,c))
+%        disp(Y(r,c))
+       Z(r,c)=f([xgs(1:7);X(r,c);Y(r,c)]);
+%        disp(xgs(1:7))
+%        disp(Z(r,c));
+   end
 end
-disp(x.^2);
+
+contourf(X,Y,Z,"ShowText","on");
