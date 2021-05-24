@@ -1,0 +1,234 @@
+\documentclass{homeworg}
+\usepackage{array}
+\usepackage{threeparttable}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{fancyhdr,lastpage}
+\usepackage[format=hang,font=normalsize,labelfont=bf]{caption}
+\usepackage{listings}
+\usepackage{setspace}
+\renewcommand{\baselinestretch}{1.0}
+\lstset{frame=single,
+  language=MATLAB,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{harvard}
+\usepackage{setspace}
+\usepackage{float,color}
+\usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{xparse}
+
+
+\DeclareMathOperator*{\argmax}{argmax} % thin space, limits underneath in displays
+
+
+\title{Notes on AFFGT(2021) Replication}
+\author{Linghui Wu}
+
+\begin{document}
+
+\maketitle
+
+\section{Open Economy Equilibrium}
+
+\subsection{Equilibrium Conditions}
+
+
+\textbf{Calibrated Parameters}
+
+The values for the calibrated parameters are taken from Table 1 on page 20 when solving the equilibrium. To be specific, they are substitution elasticities $\theta = 4$ and $\sigma = 4$, fixed costs $f^{u} = 1$ and $f^{d} = 1$,  labor intensities $\alpha^{u} = 1$ and $\alpha^{d} = 0.5483$, scaled population $L^{us} = 0.4531$ and $L^{row} = 9.5469$, productivities $A^{u}_{us} = A^{d}_{us} = 1$, $A^{u}_{row} = 0.1121$ and $A^{d}_{row} = 0.2752$, and iceberg trade costs $\tau_d = 3.0066$ and $\tau_u = 2.5731$. Tax $t^{s}_{ij}$ and subsidises $v^{s}_{ij}$ where $s \in \{u, d\} \text{ and } i, j \in \{H, F\}$ are exogenous and set to be zeros. I consider solving the model with both U.S. wages being normalized as $w_{us} = 1$ and not being normalized.
+
+\textbf{Characterizing Equations}
+
+I follow Appendix A to pin down the equations that characterize the open economy equilibrium. Here, I further simplify and reorder the non-linear system of equations so that the variables can be expressed in terms of the known parameters and the pre-defined variables.
+
+\begin{itemize}[ref=Step \arabic{enumi}, wide=0pt]
+\item Price in the upstream sectors: $(p^{u}_{ii}, p^{u}_{ij}, p^{u}_{jj}, p^{u}_{ji})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:p_u}
+mc^{u}_{i} &= \frac{\bar{\alpha^{u}}}{A^{u}_{i}}w^{\alpha^{u}}(P^{u}_{i})^{1-\alpha^{u}} = \frac{\bar{\alpha^{u}}}{A^{u}_{i}}w^{\alpha^{u}} \\
+p^{u}_{ij} &= \frac{\mu^{u}\tau^{u}_{ij}mc^{u}_{i}}{1+v^{u}_{ij}} = \frac{\mu^{u}\tau^{u}}{1+v^{u}_{ij}}\frac{\bar{\alpha^{u}}}{A^{u}_{i}}w^{\alpha^{u}}
+\end{aligned}
+\end{equation}
+since $\alpha^{u}=1$.
+\item Price indexes in the upstream sectors: $(P^{u}_{ii}, P^{u}_{ij}, P^{u}_{jj}, P^{u}_{ji})$ and $(P^{u}_{i}, P^{u}_{j})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:P_u}
+P^{u}_{ji} &= [\int_{0}^{M^{u}_{j}}[(1+t^{u}_{ji})p^{u}_{ji}(\omega)]^{1-\theta}d\omega]^{\frac{1}{1-\theta}} = (M^{u}_{j})^{\frac{1}{1-\theta}}(1+t^{u}_{ji})p^{u}_{ji} \\
+P^{u}_{i} &= [\Sigma_{j\in\{H, F\}}(P^{u}_{ji})^{1-\theta}]^{\frac{1}{1-\theta}}
+\end{aligned}
+\end{equation}
+\item Price in the downstream sectors: $(p^{d}_{ii}, p^{d}_{ij}, p^{d}_{jj}, p^{d}_{ji})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:p_d}
+mc^{d}_{i} &= \frac{\bar{\alpha^{d}}}{A^{d}_{i}}w^{\alpha^{d}}(P^{u}_{i})^{1-\alpha^{d}}\\
+p^{d}_{ij} &= \frac{\mu^{d}\tau^{d}_{ij}mc^{d}_{i}}{1+v^{d}_{ij}} = \frac{\mu^{d}\tau^{d}}{1+v^{d}_{ij}}\frac{\bar{\alpha^{d}}}{A^{d}_{i}}w^{\alpha^{d}}(P^{u}_{i})^{1-\alpha^{d}}
+\end{aligned}
+\end{equation}
+by plugging $P^{u}_{i}$ and $P^{u}_{j}$ derived from Equation \ref{eq:P_u}.
+\item Price indexes in the downstream sectors: $(P^{d}_{ii}, P^{d}_{ij}, P^{d}_{jj}, P^{d}_{ji})$ and $(P^{d}_{i}, P^{d}_{j})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:P_d}
+P^{d}_{ji} &= [\int_{0}^{M^{d}_{j}}[(1+t^{d}_{ji})p^{d}_{ji}(\omega)]^{1-\sigma}d\omega]^{\frac{1}{1-\sigma}} = (M^{d}_{j})^{\frac{1}{1-\sigma}}(1+t^{d}_{ji})p^{d}_{ji} \\
+P^{d}_{i} &= [\Sigma_{j\in\{H, F\}}(P^{d}_{ji})^{1-\sigma}]^{\frac{1}{1-\sigma}}
+\end{aligned}
+\end{equation}
+\item Production levels by free entry condition: $(y^{u}_{i}, y^{u}_{j}, y^{d}_{i}, y^{d}_{j})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:y}
+y^{d}_{i} &= (\sigma-1)f^{d}_{i} = (\sigma-1)f^{d} \\
+y^{u}_{i} &= (\theta-1)f^{u}_{i} = (\theta-1)f^{u}
+\end{aligned}
+\end{equation}
+\item Labor demand in the upstream and downstream sectors: $(\ell^{u}_{i}, \ell^{u}_{j}, \ell^{d}_{i}, \ell^{d}_{j})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:l}
+\ell^{u}_{i} &= \frac{f^{u}_{i}+y^{u}_{i}}{A^{u}_{i}} \\
+\ell^{d}_{i} &= \alpha^{d}\frac{mc^{d}_{i}(f^{d}_{i}+y^{d}_{i})}{w_{i}}
+\end{aligned}
+\end{equation}
+where $y^{u}_{i}$, $y^{d}_{i}$ and $mc^{d}_{i}$ are from Equations \ref{eq:y} and \ref{eq:p_d}.
+\item Quantities and outputs in the upstream sectors: $(Q^{u}_{ii}, Q^{u}_{ij}, Q^{d}_{ji}, Q^{d}_{jj})$ and $(x_{ii}, x_{ij}, x_{ji}, x_{jj})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:Q,x}
+Q^{u}_{ij} &= (1-\alpha^{d})\frac{mc^{d}_{i}(f^{d}_{i}+y^{d}_{i})}{P^{u}_{i}}(\frac{P^{u}_{ji}}{P^{u}_{i}})^{-\theta} = (1-\alpha^{d})\frac{mc^{d}_{i}(f^{d}+y^{d}_{i})}{P^{u}_{i}}(\frac{P^{u}_{ji}}{P^{u}_{i}})^{-\theta} \\
+x_{ji} &= Q^{u}_{ji}[\frac{(1+t^{u}_{ji})p^{u}_{ji}}{P^{u}_{ji}}]^{-\theta}
+\end{aligned}
+\end{equation}
+\item Outputs in the downstream sectors: $(c_{ii}, c_{ij}, c_{ji}, c_{jj})$.
+\begin{equation}
+\begin{aligned}
+\label{eq:c}
+c_{ji} &= \frac{w_{i}L_{i}+T_{i}}{(P^{d}_{i})^{1-\sigma}}[(1+t^{d}_{ji})p^{d}_{ji}]^{-\sigma}
+\end{aligned}
+\end{equation}
+\end{itemize}
+
+\subsection{Solving Non-linear Systems}
+
+To solve the equilibrium allocations, I need $\boldsymbol{x}=(w_{j}, M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}, T_{i}, T_{j})$ be a vector of seven endogenous variables if the wage is normalized and $\boldsymbol{x}=(w_{i}, w_{j}, M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}, T_{i}, T_{j})$ be a vector of eight endogenous variables otherwise\footnote{The corresponding MATLAB scripts are \lstinline{est.m} and \lstinline{solve_eq.m} for the open economy where the wage is not normalized. \lstinline{est_nw.m} and \lstinline{solve_eq_nw.m} are for the open economy where the wage is normalized.}. The equilibrium constraints that I employ for optimizations are as follows\footnote{When the wage is not normalized, the non-linear system is squared with eight unknowns and eight equations and it yields a unique solution. On the other hand, when the wage is not normalized, I utilize the same set of eight equations. Though the number of unknown parameters is fewer than that of the equations, the system still yields a unique solution}.
+\begin{itemize}[ref=Step \arabic{enumi}, wide=0pt]
+\item Labor market clearing: $(LMC_{i}, LMC_{j})=\boldsymbol{0}$.
+\begin{equation}
+\begin{aligned}
+\label{eq:lmc}
+LMC_{i} &= L_{i}-M^{d}_{i}*\ell^{d}_{i}-M^{u}_{i}*\ell^{u}_{i}
+\end{aligned}
+\end{equation}
+\label{eq:gmc}
+\item Good market clearing: $(GMC^{u}_{i}, GMC^{u}_{j}, GMC^{d}_{i}, GMC^{d}_{j})=\boldsymbol{0}$.
+\begin{equation}
+\begin{aligned}
+\label{eq:gmc}
+GMC^{u}_{i} &= y^{u}_{i}-M^{d}_{i}x_{ii}-M^{d}_{j}\tau^{u}_{ij}x_{ij} = y^{u}_{i}-M^{d}_{i}x_{ii}-M^{d}_{j}\tau^{u}x_{ij}\\
+GMC^{d}_{i} &= y^{d}_{i}-c_{ii}-\tau^{d}_{ij}c_{ij} = y^{d}_{i}-c_{ii}-\tau^{d}c_{ij}
+\end{aligned}
+\end{equation}
+\item Budget balance: $(BB_{i}, BB_{j})=\boldsymbol{0}$.
+\begin{equation}
+\begin{aligned}
+\label{eq:bb}
+BB_{i} &= T_{i} - \Sigma_{j\in\{H,F\}}[t^d_{ji}M^{d}_{j}c_{ji}p^{d}_{ji}+t^{u}_{ji}M^{d}_{i}M^{u}_{j}x_{ji}p^{u}_{ji}-v^{d}_{ij}M^{d}_{i}c_{ij}p^{d}_{ij}-v^{u}_{ij}M^{u}_{i}M^{d}_{j}x_{ij}p^{u}_{ij}].
+\end{aligned}
+\end{equation}
+\end{itemize}
+
+\subsection{Results and Allocations}
+
+I implement \lstinline{fsolve} in MATLAB as the numerical solver \footnote{Due to the restricted access to \lstinline{Knitro}.} with the $\boldsymbol{x} = \boldsymbol{(\sqrt{x}) ^ 2}$ technique to solve the equilibrium allocations. Here, I only report the results when the wage is normalized.
+
+The values for the eight params are
+\begin{align*}
+\begin{bmatrix}
+w_j
+\end{bmatrix} &= \begin{bmatrix}
+0.1285
+\end{bmatrix} \\
+\begin{bmatrix}
+M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}
+\end{bmatrix} &= \begin{bmatrix}
+0.0516, 0.1205, 0.0322, 0.0790
+\end{bmatrix} \\
+\begin{bmatrix}
+T_{i}, T_{j}
+\end{bmatrix} &= \begin{bmatrix}
+4.63e^{-10}, 1.75e^{-10}
+\end{bmatrix}
+\end{align*}
+The optimized parameters are independent of the initial guesses that passed in. "fsolve" finds the right solution and exits because the first-order optimality is small. The diagnostics of the optimization results shows that the sum of the squared function errors "fval" is 7.93e-18 and the sum of absolute "fval" is 4.79e-9. 
+
+Next, I compare the statistics around the zero-tariff equilibrium with those in Table 3 of the draft. Except for discrepency from the numerical precision, the two sets of statistics are nearly the same.
+
+\begin{table}[H]
+\centering
+\caption{\textbf{Comparison of Statistics around the Zero Tariff Equilibrium}}
+\label{tab:stats_compar}
+\begin{tabular}{llllllll}
+\hline\hline
+Statistics   & $\Omega_{H, H}$ & $\Omega_{F, H}$ & $\Omega_{F, F}$ & $\Omega_{H, F}$ & $b^{H}_{H}$ & $b^{H}_{F}$ & $\lambda^{d}_{H}$ \\
+\hline
+Table 3 & 0.4149 & 0.0368 & 0.4356 & 0.016 & 0.9363 & 0.0617 & 0.993 \\
+My Solutions & 0.4150 & 0.0367 & 0.4357 & 0.016 & 0.9383 & 0.0617 & 0.993 \\
+\hline\hline
+\end{tabular}
+\begin{flushleft}
+\scriptsize{\textit{Note:} This table contains summary statistics for the endogeneous aggregate variables relevant for the first order approximation around the zero tariff equilibrium. 
+
+$\Omega_{F, H}\equiv\frac{M^{u}_{F}M^{d}_{H}p^{u}_{F, H}x_{F, H}}{M^{d}_{H}(p^{d}_{H,F}c_{H,F}+p^{d}_{H,H}c_{H,H})}$ is the share of Home final-good revenue spend on intermediate input varieties from F. 
+
+$b^{H}_{F}\equiv\frac{M^{d}_{F}p^{d}_{F,H}c^{d}_{F,H}}{w_{H}L_{H}}$ is the share of Home income spend on foreign varieties. 
+
+$\lambda^{d}_{H}\equiv\frac{M^{d}_{H}(p^{d}_{H,F}c_{H,F}+p^{d}_{H,H}c_{H,H})}{w_{H}L_{H}}$ is the ratio of domestic final-good revenue to national income in country H.}
+\end{flushleft}
+\end{table}
+
+\section{Minor Comments}
+
+A few grammatical errors and typos in the April 24 draft are as follows.
+
+\begin{enumerate}[ref=Step \arabic{enumi}, wide=0pt]
+
+\item On page 6, it says “thus assuming that all firm’s output can used as either for final consumption or as an intermediate input”. It should be “[…] can be used as […]”.
+
+\item On page 36, the last sentence of the first paragraph begins with “Nota that”. It should be “Note that”.
+
+\item In equation (29) on page 36, the integration domain of $P^{u}_{ji}$ should be from $0$ to $M^{u}_{j}$ not to $M^{d}_{j}$.
+
+\item In equation (32) on page 37, the subscript of $c_{ji}$ is flipped. It should be $y^{d}_{i} = c_{ii} + tau^{d}_{ij}c_{ij}$.
+
+\item In equation (34) on page 37, the last term of $T_{i}$ should be $-v^{u}_{ij}M^{d}_{j}M^{u}_{i}x_{ij}p^{u}_{ij}$.
+
+\end{enumerate}
+
+To improve readability, I would suggest specifying on page 36 that
+
+\begin{enumerate}[ref=Step \arabic{enumi}, wide=0pt]
+
+\item $\mu_u = \frac{\theta}{\theta-1}$ and $\mu_d = \frac{\sigma}{\sigma-1}$ in equation (26).
+
+\item $\bar{\alpha^{s}} = \frac{1}{(\alpha^{s})^{\alpha^{s}}(1-\alpha^{s})^{1-\alpha_s}}$ where $s \in \{u, d\}$ in equation (26).
+
+\item $\alpha$ in equations (28) for $Q^{u}_{ij}$ and $\ell^{d}_{i}$is $\alpha^{d}$.
+
+\end{enumerate}
+
+\end{document}
