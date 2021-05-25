@@ -139,7 +139,7 @@ T_ji=cal_T_ij(x(9)^2,x(8)^2,x(11)^2,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
 T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
             x_jj,x_jj,c_jj,c_jj,p_d_jj,p_d_jj,p_u_jj,p_u_jj);
 cons(7)=cal_BB_i(x(6)^2,T_ii,T_ji); % BB_i
-cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij); % BB_i
+cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij); % BB_j
 
 %% Function output
 ceq=[];
