@@ -1,4 +1,4 @@
-%% Solve the optimal tax instruments
+%% Solve the optimal tarrifs
 function opt_u = solve_opt_tariff(x,params)
 %% Set params
 % Notations: d for downstream, u for upstream; i for us, j for row.
@@ -93,12 +93,6 @@ P_d_j=cal_P_s_i(P_d_jj,sigma,P_d_ij);
 y_d_i=cal_y_s_i(sigma,f_d); y_d_j=y_d_i;
 y_u_i=cal_y_s_i(theta,f_u); y_u_j=y_u_i;
 
-% Labor demand for upstream and downstream sectors
-l_d_i=cal_l_d_i(alpha_d,mc_d_i,f_d,y_d_i,w_i);
-l_d_j=cal_l_d_i(alpha_d,mc_d_j,f_d,y_d_j,x(1)^2);
-l_u_i=cal_l_u_i(f_u,y_u_i,A_u_i);
-l_u_j=cal_l_u_i(f_u,y_u_j,A_u_j);
-
 % Quantities in upstream sectors
 Q_u_ij=cal_Q_u_ij(alpha_d,mc_d_j,f_d,y_d_j,P_u_j,P_u_ij,theta);
 Q_u_ji=cal_Q_u_ij(alpha_d,mc_d_i,f_d,y_d_i,P_u_i,P_u_ji,theta);
@@ -117,35 +111,15 @@ c_ji=cal_c_ij(w_i,L_i,x(6)^2,x(9)^2,p_d_ji,sigma,P_d_i);
 c_ii=cal_c_ij(w_i,L_i,x(6)^2,t_d_ii,p_d_ii,sigma,P_d_i);
 c_jj=cal_c_ij(x(1)^2,L_j,x(7)^2,t_d_jj,p_d_jj,sigma,P_d_j);
 
-
 %% Equilibrium constraints
-
-% Labor market clearing
-LMC_i=cal_LMC_i(L_i,x(4)^2,l_d_i,x(2)^2,l_u_i);
-LMC_j=cal_LMC_i(L_j,x(5)^2,l_d_j,x(3)^2,l_u_j);
-
-% Goods market clearing
-GMC_d_i=cal_GMC_d_i(y_d_i,c_ii,tau_d,c_ij);
-GMC_d_j=cal_GMC_d_i(y_d_j,c_jj,tau_d,c_ji);
-GMC_u_i=cal_GMC_u_i(y_u_i,x(4)^2,x_ii,x(5)^2,tau_u,x_ij);
-GMC_u_j=cal_GMC_u_i(y_u_j,x(5)^2,x_jj,x(4)^2,tau_u,x_ji);
-
 % Budget balance
-T_ij=cal_T_ij(t_d_ij,t_u_ij,v_d_ji,v_u_ji,x(4)^2,x(5)^2,x(2)^2,x(3)^2,...
-            x_ij,x_ji,c_ij,c_ji,p_d_ij,p_d_ji,p_u_ij,p_u_ji);
 T_ii=cal_T_ij(t_d_ii,t_u_ii,v_d_ii,v_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
             x_ii,x_ii,c_ii,c_ii,p_d_ii,p_d_ii,p_u_ii,p_u_ii);
 T_ji=cal_T_ij(x(9)^2,x(8)^2,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
             x_ji,x_ij,c_ji,c_ij,p_d_ji,p_d_ij,p_u_ji,p_u_ij);
-T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
-            x_jj,x_jj,c_jj,c_jj,p_d_jj,p_d_jj,p_u_jj,p_u_jj);
-BB_i=cal_BB_i(x(6)^2,T_ii,T_ji);
-BB_j=cal_BB_i(x(7)^2,T_jj,T_ij);
-
 
 %% Function output
-U_i=cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i);
-opt_u=-U_i;
+opt_u=cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i);
 
 end
 
@@ -177,15 +151,6 @@ function P_s_i=cal_P_s_i(P_s_ii,e,P_s_ji)
     P_s_i=(P_s_ii^(1-e)+P_s_ji^(1-e))^(1/(1-e));
 end
 
-% Calculate labor demand
-function l_d_i=cal_l_d_i(alpha_d,mc_d_i,f_d,y_d_i,w_i)
-    l_d_i=alpha_d*mc_d_i*(f_d+y_d_i)/w_i;
-end
-
-function l_u_i=cal_l_u_i(f_u,y_u_i,A_u_i)
-    l_u_i=(f_u+y_u_i)/A_u_i;
-end
-
 % Calculate quantities in the upstream sector
 function Q_u_ij=cal_Q_u_ij(alpha_d,mc_d_j,f_d,y_d_j,P_u_j,P_u_ij,theta)
     Q_u_ij=(1-alpha_d)*mc_d_j*(f_d+y_d_j)/P_u_j*(P_u_ij/P_u_j)^-theta;
@@ -206,20 +171,6 @@ function y_s_i=cal_y_s_i(e,f_i)
     y_s_i=(e-1)*f_i;
 end
 
-% Define labor market clearing
-function LMC_i=cal_LMC_i(L_i,M_d_i,l_d_i,M_u_i,l_u_i)
-    LMC_i=L_i-M_d_i*l_d_i-M_u_i*l_u_i;
-end
-
-% Define good market clearing
-function GMC_d_i=cal_GMC_d_i(y_d_i,c_ii,tau_d,c_ij)
-    GMC_d_i=y_d_i-c_ii-tau_d*c_ij;
-end
-
-function GMC_u_i=cal_GMC_u_i(y_u_i,M_d_i,x_ii,M_d_j,tau_u,x_ij)
-    GMC_u_i=y_u_i-M_d_i*x_ii-M_d_j*tau_u*x_ij;
-end
-
 % Calculate tax revenues
 function T_ij=cal_T_ij(t_d_ij,t_u_ij,v_d_ji,v_u_ji,...
                         M_d_i,M_d_j,M_u_i,M_u_j,...
@@ -229,11 +180,6 @@ function T_ij=cal_T_ij(t_d_ij,t_u_ij,v_d_ji,v_u_ji,...
         t_u_ij*M_d_j*M_u_i*x_ij*p_u_ij-...
         v_d_ji*M_d_j*c_ji*p_d_ji-...
         v_u_ji*M_d_i*M_u_j*x_ji*p_u_ji;
-end
-
-% Define budget balance
-function BB_i=cal_BB_i(T_i,T_ii,T_ji)
-    BB_i=T_i-T_ii-T_ji;
 end
 
 % Calculate household utility

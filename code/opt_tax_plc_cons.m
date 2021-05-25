@@ -1,5 +1,5 @@
 %% Define optimal tariff constraints
-function [cons, ceq]=opt_tariff_cons(x,params)
+function [cons, ceq]=opt_tax_plc_cons(x,params)
 %% Set params
 % Notations: d for downstream, u for upstream; i for us, j for row.
 
@@ -40,11 +40,11 @@ w_i = params.w_us;
 % Assumes no tariffs on US goods in baseline
 t_d_ii = 0; t_d_ij = 0;  % Local tax on downstream goods in country i
 t_d_jj = 0;  % Local tax on downstream goods in country j
-t_u_ii = 0; t_u_ij = 0;  % Local tax on upstream goods in country i
+t_u_ij = 0;  % Local tax on upstream goods in country i
 t_u_jj = 0;  % Local tax on upstream goods in country j
 
 % Subsidies (v_s_ji denotes subsidies to goods from country j sector s to country i)
-v_d_ii = 0; v_d_ij = 0; v_d_jj = 0; v_d_ji = 0;
+v_d_ii = 0; v_d_jj = 0; v_d_ji = 0;
 v_u_ii = 0; v_u_ij = 0; v_u_jj = 0; v_u_ji = 0;
 
 
@@ -61,7 +61,7 @@ p_u_jj=cal_p_s_ij(mu_u,1,mc_u_j,v_u_jj);
 
 % Price index in upstream sectors
 P_u_ij=cal_P_s_ij(x(2)^2,theta,t_u_ij,p_u_ij);
-P_u_ii=cal_P_s_ij(x(2)^2,theta,t_u_ii,p_u_ii);
+P_u_ii=cal_P_s_ij(x(2)^2,theta,(-x(10)^2),p_u_ii);
 P_u_ji=cal_P_s_ij(x(3)^2,theta,x(8)^2,p_u_ji);
 P_u_jj=cal_P_s_ij(x(3)^2,theta,t_u_jj,p_u_jj);
 
@@ -74,7 +74,7 @@ mc_d_i=cal_mc_d_i(alpha_d,A_d_i,w_i,P_u_i);
 mc_d_j=cal_mc_d_i(alpha_d,A_d_j,x(1)^2,P_u_j);
 
 % Price in downstream sectors
-p_d_ij=cal_p_s_ij(mu_d,tau_d,mc_d_i,v_d_ij);
+p_d_ij=cal_p_s_ij(mu_d,tau_d,mc_d_i,x(11)^2);
 p_d_ji=cal_p_s_ij(mu_d,tau_d,mc_d_j,v_d_ji);
 p_d_ii=cal_p_s_ij(mu_d,1,mc_d_i,v_d_ii);
 p_d_jj=cal_p_s_ij(mu_d,1,mc_d_j,v_d_jj);
@@ -108,7 +108,7 @@ Q_u_jj=cal_Q_u_ij(alpha_d,mc_d_j,f_d,y_d_j,P_u_j,P_u_jj,theta);
 % Output in upstream sectors
 x_ij=cal_x_ij(Q_u_ij,t_u_ij,p_u_ij,P_u_ij,theta);
 x_ji=cal_x_ij(Q_u_ji,x(8)^2,p_u_ji,P_u_ji,theta);
-x_ii=cal_x_ij(Q_u_ii,t_u_ii,p_u_ii,P_u_ii,theta);
+x_ii=cal_x_ij(Q_u_ii,(-x(10)^2),p_u_ii,P_u_ii,theta);
 x_jj=cal_x_ij(Q_u_jj,t_u_jj,p_u_jj,P_u_jj,theta);
 
 % Output in downstream sectors, currently no tax revenues included
@@ -132,9 +132,9 @@ cons(6)=cal_GMC_u_i(y_u_j,x(5)^2,x_jj,x(4)^2,tau_u,x_ji); % GMC_d_j
 % Budget balance
 T_ij=cal_T_ij(t_d_ij,t_u_ij,v_d_ji,v_u_ji,x(4)^2,x(5)^2,x(2)^2,x(3)^2,...
             x_ij,x_ji,c_ij,c_ji,p_d_ij,p_d_ji,p_u_ij,p_u_ji);
-T_ii=cal_T_ij(t_d_ii,t_u_ii,v_d_ii,v_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
+T_ii=cal_T_ij(t_d_ii,(-x(10)^2),v_d_ii,v_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
             x_ii,x_ii,c_ii,c_ii,p_d_ii,p_d_ii,p_u_ii,p_u_ii);
-T_ji=cal_T_ij(x(9)^2,x(8)^2,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
+T_ji=cal_T_ij(x(9)^2,x(8)^2,x(11)^2,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
             x_ji,x_ij,c_ji,c_ij,p_d_ji,p_d_ij,p_u_ji,p_u_ij);
 T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
             x_jj,x_jj,c_jj,c_jj,p_d_jj,p_d_jj,p_u_jj,p_u_jj);
