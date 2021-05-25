@@ -119,7 +119,7 @@ T_ji=cal_T_ij(x(9)^2,x(8)^2,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
             x_ji,x_ij,c_ji,c_ij,p_d_ji,p_d_ij,p_u_ji,p_u_ij);
 
 %% Function output
-opt_u=cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i);
+opt_u=-cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i);
 
 end
 
