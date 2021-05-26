@@ -118,7 +118,7 @@ c_ii=cal_c_ij(w_i,L_i,x(6)^2,t_d_ii,p_d_ii,sigma,P_d_i);
 c_jj=cal_c_ij(x(1)^2,L_j,x(7)^2,t_d_jj,p_d_jj,sigma,P_d_j);
 
 
-%% Equilibrium constraints
+%% Equilibrium constraints & function output
 % Labor market clearing
 cons(1)=cal_LMC_i(L_i,x(4)^2,l_d_i,x(2)^2,l_u_i); % LMC_i
 cons(2)=cal_LMC_i(L_j,x(5)^2,l_d_j,x(3)^2,l_u_j); % LMC_j
@@ -139,9 +139,8 @@ T_ji=cal_T_ij(x(9)^2,x(8)^2,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
 T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
             x_jj,x_jj,c_jj,c_jj,p_d_jj,p_d_jj,p_u_jj,p_u_jj);
 cons(7)=cal_BB_i(x(6)^2,T_ii,T_ji); % BB_i
-cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij); % BB_i
+cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij); % BB_j
 
-%% Function output
 ceq=[];
 
 end
@@ -230,9 +229,4 @@ end
 % Define budget balance
 function BB_i=cal_BB_i(T_i,T_ii,T_ji)
     BB_i=T_i-T_ii-T_ji;
-end
-
-% Calculate household utility
-function U_i=cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i)
-    U_i=(w_i*L_i+T_ii+T_ji)/P_d_i;
 end

@@ -1,8 +1,30 @@
-%% Solve the optimal tariff and domestic subsidy
-function opt_u=solve_opt_tar_sub(x,params)
-%% Set params
-% Notations: d for downstream, u for upstream; i for us, j for row.
+%% Solve optimal tax policies
+function opt_u = solve_opt_tax(t, params)
+% Set initial guesses and optimize
+x0 = unifrnd(0, 1, [7, 1]);
+% Set optimization options
+opt_eqlm = optimset("Algorithm", "levenberg-marquardt", "Display", "off", ...
+    "MaxFunEvals", 1e4, "MaxIter", 1e4, "TolX", 1e-6, ...
+    "TolFun", 1e-6, "Diagnostics", "off");
+[x, fval, exitflag_eqlm, output] = fsolve(@(x) solve_eqlm2(x, params, t), ...
+                                x0, opt_eqlm);
 
+% Calculates statistics around the equilibrium
+stats = cal_stats(x.^2, params);
+
+if exitflag_eqlm == 1
+    disp("Given taxes, the equilibrium is solved.");
+    opt_u = -stats(8);
+else
+    disp("Cannot find the equilibrium.")
+    opt_u = 0;
+end
+disp(x.^2);
+disp(stats);
+
+
+function eqlm = solve_eqlm2(x, params, t)
+%% Set params
 % Substitution elasticities
 theta = params.theta;
 sigma = params.sigma;
@@ -36,17 +58,17 @@ tau_u = params.tau_u;
 % Wages: normalize US wage to 1
 w_i = params.w_us;
 
-% Taxes (t_s_ij rep'ts tax by country j on goods from country i sector s)
-% Assumes no tariffs on US goods in baseline
+% Taxes: t_s_ij rep'ts tax by country j on goods from country i sector s
+t_u_ii = 0; t_u_ij = 0;  % Local tax on upstream goods in country i
+t_u_jj = 0; t_u_ji = t(1).^2;  % Local tax on upstream goods in country j
 t_d_ii = 0; t_d_ij = 0;  % Local tax on downstream goods in country i
-t_d_jj = 0;  % Local tax on downstream goods in country j
-t_u_ij = 0;  % Local tax on upstream goods in country i
-t_u_jj = 0;  % Local tax on upstream goods in country j
+t_d_jj = 0; t_d_ji = t(2).^2;  % Local tax on downstream goods in country j
 
-% Subsidies (v_s_ji denotes subsidies to goods from country j sector s to country i)
-v_d_ii = 0; v_d_ij = 0; v_d_jj = 0; v_d_ji = 0;
-v_u_ii = 0; v_u_ij = 0; v_u_jj = 0; v_u_ji = 0;
-
+% Subsidies: v_s_ji denotes subsidies to goods from country j sector s to country i
+v_d_ii = 0; v_d_ij = 0; 
+v_d_jj = 0; v_d_ji = 0;
+v_u_ii = 0; v_u_ij = 0; 
+v_u_jj = 0; v_u_ji = 0;
 
 %% Equilibrium equations
 % Marginal cost of upstream sector in country i and j
@@ -61,8 +83,8 @@ p_u_jj=cal_p_s_ij(mu_u,1,mc_u_j,v_u_jj);
 
 % Price index in upstream sectors
 P_u_ij=cal_P_s_ij(x(2)^2,theta,t_u_ij,p_u_ij);
-P_u_ii=cal_P_s_ij(x(2)^2,theta,-x(10)^2,p_u_ii);
-P_u_ji=cal_P_s_ij(x(3)^2,theta,x(8)^2,p_u_ji);
+P_u_ii=cal_P_s_ij(x(2)^2,theta,t_u_ii,p_u_ii);
+P_u_ji=cal_P_s_ij(x(3)^2,theta,t_u_ji,p_u_ji);
 P_u_jj=cal_P_s_ij(x(3)^2,theta,t_u_jj,p_u_jj);
 
 % Price index in upstream sector for country i and country j
@@ -81,7 +103,7 @@ p_d_jj=cal_p_s_ij(mu_d,1,mc_d_j,v_d_jj);
 
 % Price index in downstream sectors
 P_d_ij=cal_P_s_ij(x(4)^2,sigma,t_d_ij,p_d_ij);
-P_d_ji=cal_P_s_ij(x(5)^2,sigma,x(9)^2,p_d_ji);
+P_d_ji=cal_P_s_ij(x(5)^2,sigma,t_d_ji,p_d_ji);
 P_d_ii=cal_P_s_ij(x(4)^2,sigma,t_d_ii,p_d_ii);
 P_d_jj=cal_P_s_ij(x(5)^2,sigma,t_d_jj,p_d_jj);
 
@@ -107,31 +129,47 @@ Q_u_jj=cal_Q_u_ij(alpha_d,mc_d_j,f_d,y_d_j,P_u_j,P_u_jj,theta);
 
 % Output in upstream sectors
 x_ij=cal_x_ij(Q_u_ij,t_u_ij,p_u_ij,P_u_ij,theta);
-x_ji=cal_x_ij(Q_u_ji,x(8)^2,p_u_ji,P_u_ji,theta);
-x_ii=cal_x_ij(Q_u_ii,-x(10)^2,p_u_ii,P_u_ii,theta);
+x_ji=cal_x_ij(Q_u_ji,t_u_ji,p_u_ji,P_u_ji,theta);
+x_ii=cal_x_ij(Q_u_ii,t_u_ii,p_u_ii,P_u_ii,theta);
 x_jj=cal_x_ij(Q_u_jj,t_u_jj,p_u_jj,P_u_jj,theta);
 
 % Output in downstream sectors, currently no tax revenues included
 c_ij=cal_c_ij(x(1)^2,L_j,x(7)^2,t_d_ij,p_d_ij,sigma,P_d_j);
-c_ji=cal_c_ij(w_i,L_i,x(6)^2,x(9)^2,p_d_ji,sigma,P_d_i);
+c_ji=cal_c_ij(w_i,L_i,x(6)^2,t_d_ji,p_d_ji,sigma,P_d_i);
 c_ii=cal_c_ij(w_i,L_i,x(6)^2,t_d_ii,p_d_ii,sigma,P_d_i);
 c_jj=cal_c_ij(x(1)^2,L_j,x(7)^2,t_d_jj,p_d_jj,sigma,P_d_j);
 
 
-%% Equilibrium constraints & function output
+%% Equilibrium constraints
+% Labor market clearing
+LMC_i=cal_LMC_i(L_i,x(4)^2,l_d_i,x(2)^2,l_u_i);
+LMC_j=cal_LMC_i(L_j,x(5)^2,l_d_j,x(3)^2,l_u_j);
 
-% Budget balance
-T_ii=cal_T_ij(t_d_ii,-x(10)^2,v_d_ii,v_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
+% Goods market clearing
+GMC_d_i=cal_GMC_d_i(y_d_i,c_ii,tau_d,c_ij);
+GMC_d_j=cal_GMC_d_i(y_d_j,c_jj,tau_d,c_ji);
+GMC_u_i=cal_GMC_u_i(y_u_i,x(4)^2,x_ii,x(5)^2,tau_u,x_ij);
+GMC_u_j=cal_GMC_u_i(y_u_j,x(5)^2,x_jj,x(4)^2,tau_u,x_ji);
+
+% Buget balance 
+T_ij=cal_T_ij(t_d_ij,t_u_ij,v_d_ji,v_u_ji,x(4)^2,x(5)^2,x(2)^2,x(3)^2,...
+            x_ij,x_ji,c_ij,c_ji,p_d_ij,p_d_ji,p_u_ij,p_u_ji);
+T_ii=cal_T_ij(t_d_ii,t_u_ii,v_d_ii,v_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
             x_ii,x_ii,c_ii,c_ii,p_d_ii,p_d_ii,p_u_ii,p_u_ii);
-T_ji=cal_T_ij(x(9)^2,x(8)^2,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
+T_ji=cal_T_ij(t_d_ji,t_u_ji,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
             x_ji,x_ij,c_ji,c_ij,p_d_ji,p_d_ij,p_u_ji,p_u_ij);
+T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
+            x_jj,x_jj,c_jj,c_jj,p_d_jj,p_d_jj,p_u_jj,p_u_jj);
+BB_i=cal_BB_i(x(6)^2,T_ii,T_ji);
+BB_j=cal_BB_i(x(7)^2,T_jj,T_ij);
 
-opt_u=-cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i);
-
+%% Function output
+eqlm = [LMC_j, LMC_i, ...
+    GMC_u_i, GMC_u_j, GMC_d_i, GMC_d_j, ...
+    BB_i, BB_j];
 end
 
 %% Define auxilliary functions
-
 % Calculate marginal costs
 function mc_u_i=cal_mc_u_i(alpha_u,A_u_i,w_i)
     alpha_u_bar=1/(alpha_u^alpha_u*(1-alpha_u)^(1-alpha_u));
@@ -215,7 +253,6 @@ end
 function BB_i=cal_BB_i(T_i,T_ii,T_ji)
     BB_i=T_i-T_ii-T_ji;
 end
-
 
 % Calculate household utility
 function U_i=cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i)

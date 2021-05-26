@@ -1,4 +1,4 @@
-%% Solves the zero-tariff equilibrium
+%% Solve the zero-tariff equilibrium
 function eqlm = solve_eqlm(params, x)
 %% Set params
 % Notations: d for downstream, u for upstream; i for us, j for row.

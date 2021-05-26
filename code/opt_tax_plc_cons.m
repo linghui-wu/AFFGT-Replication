@@ -40,11 +40,11 @@ w_i = params.w_us;
 % Assumes no tariffs on US goods in baseline
 t_d_ii = 0; t_d_ij = 0;  % Local tax on downstream goods in country i
 t_d_jj = 0;  % Local tax on downstream goods in country j
-t_u_ij = 0;  % Local tax on upstream goods in country i
-t_u_jj = 0;  % Local tax on upstream goods in country j
+t_u_ij = 0; t_u_ii = -x(10)^2; % Local tax on upstream goods in country i
+t_u_jj = 0; % Local tax on upstream goods in country j
 
 % Subsidies (v_s_ji denotes subsidies to goods from country j sector s to country i)
-v_d_ii = 0; v_d_jj = 0; v_d_ji = 0;
+v_d_ii = 0; v_d_ij = 0; v_d_jj = 0; 
 v_u_ii = 0; v_u_ij = 0; v_u_jj = 0; v_u_ji = 0;
 
 
@@ -74,8 +74,8 @@ mc_d_i=cal_mc_d_i(alpha_d,A_d_i,w_i,P_u_i);
 mc_d_j=cal_mc_d_i(alpha_d,A_d_j,x(1)^2,P_u_j);
 
 % Price in downstream sectors
-p_d_ij=cal_p_s_ij(mu_d,tau_d,mc_d_i,x(11)^2);
-p_d_ji=cal_p_s_ij(mu_d,tau_d,mc_d_j,v_d_ji);
+p_d_ij=cal_p_s_ij(mu_d,tau_d,mc_d_i,v_d_ij);
+p_d_ji=cal_p_s_ij(mu_d,tau_d,mc_d_j,x(11)^2);
 p_d_ii=cal_p_s_ij(mu_d,1,mc_d_i,v_d_ii);
 p_d_jj=cal_p_s_ij(mu_d,1,mc_d_j,v_d_jj);
 
@@ -117,8 +117,7 @@ c_ji=cal_c_ij(w_i,L_i,x(6)^2,x(9)^2,p_d_ji,sigma,P_d_i);
 c_ii=cal_c_ij(w_i,L_i,x(6)^2,t_d_ii,p_d_ii,sigma,P_d_i);
 c_jj=cal_c_ij(x(1)^2,L_j,x(7)^2,t_d_jj,p_d_jj,sigma,P_d_j);
 
-
-%% Equilibrium constraints
+%% Equilibrium constraints & function output
 % Labor market clearing
 cons(1)=cal_LMC_i(L_i,x(4)^2,l_d_i,x(2)^2,l_u_i); % LMC_i
 cons(2)=cal_LMC_i(L_j,x(5)^2,l_d_j,x(3)^2,l_u_j); % LMC_j
@@ -130,20 +129,19 @@ cons(5)=cal_GMC_u_i(y_u_i,x(4)^2,x_ii,x(5)^2,tau_u,x_ij); % GMC_u_i
 cons(6)=cal_GMC_u_i(y_u_j,x(5)^2,x_jj,x(4)^2,tau_u,x_ji); % GMC_d_j
 
 % Budget balance
-T_ij=cal_T_ij(t_d_ij,t_u_ij,v_d_ji,v_u_ji,x(4)^2,x(5)^2,x(2)^2,x(3)^2,...
+T_ij=cal_T_ij(t_d_ij,t_u_ij,x(11)^2,v_u_ji,x(4)^2,x(5)^2,x(2)^2,x(3)^2,...
             x_ij,x_ji,c_ij,c_ji,p_d_ij,p_d_ji,p_u_ij,p_u_ji);
 T_ii=cal_T_ij(t_d_ii,(-x(10)^2),v_d_ii,v_u_ii,x(4)^2,x(4)^2,x(2)^2,x(2)^2,...
             x_ii,x_ii,c_ii,c_ii,p_d_ii,p_d_ii,p_u_ii,p_u_ii);
-T_ji=cal_T_ij(x(9)^2,x(8)^2,x(11)^2,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
+T_ji=cal_T_ij(x(9)^2,x(8)^2,v_d_ij,v_u_ij,x(5)^2,x(4)^2,x(3)^2,x(2)^2,...
             x_ji,x_ij,c_ji,c_ij,p_d_ji,p_d_ij,p_u_ji,p_u_ij);
 T_jj=cal_T_ij(t_d_jj,t_u_jj,v_d_jj,v_u_jj,x(5)^2,x(5)^2,x(3)^2,x(3)^2,...
             x_jj,x_jj,c_jj,c_jj,p_d_jj,p_d_jj,p_u_jj,p_u_jj);
-cons(7)=cal_BB_i(x(6)^2,T_ii,T_ji); % BB_i
-cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij); % BB_j
+        
+cons(7)=cal_BB_i(x(6)^2,T_ii,T_ji) - 0; % BB_i
+cons(8)=cal_BB_i(x(7)^2,T_jj,T_ij) - 0; % BB_j
 
-%% Function output
-ceq=[];
-
+ceq = [];
 end
 
 %% Define auxilliary functions
@@ -230,9 +228,4 @@ end
 % Define budget balance
 function BB_i=cal_BB_i(T_i,T_ii,T_ji)
     BB_i=T_i-T_ii-T_ji;
-end
-
-% Calculate household utility
-function U_i=cal_U_i(w_i,L_i,T_ii,T_ji,P_d_i)
-    U_i=(w_i*L_i+T_ii+T_ji)/P_d_i;
 end
