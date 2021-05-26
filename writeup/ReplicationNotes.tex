@@ -29,12 +29,13 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{xparse}
-
+\usepackage[useregional]{datetime2}
+\DTMlangsetup{showdayofmonth=false}
 
 \DeclareMathOperator*{\argmax}{argmax} % thin space, limits underneath in displays
 
 
-\title{Notes on AFFGT(2021) Replication}
+\title{Notes on AFGT(2021) Replication}
 \author{Linghui Wu}
 
 \begin{document}
@@ -125,7 +126,7 @@ c_{ji} &= \frac{w_{i}L_{i}+T_{i}}{(P^{d}_{i})^{1-\sigma}}[(1+t^{d}_{ji})p^{d}_{j
 
 \subsection{Solving Non-linear Systems}
 
-To solve the equilibrium allocations, I need $\boldsymbol{x}=(w_{j}, M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}, T_{i}, T_{j})$ be a vector of seven endogenous variables if the wage is normalized and $\boldsymbol{x}=(w_{i}, w_{j}, M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}, T_{i}, T_{j})$ be a vector of eight endogenous variables otherwise\footnote{The corresponding MATLAB scripts are \lstinline{est.m} and \lstinline{solve_eq.m} for the open economy where the wage is not normalized. \lstinline{est_nw.m} and \lstinline{solve_eq_nw.m} are for the open economy where the wage is normalized.}. The equilibrium constraints that I employ for optimizations are as follows\footnote{When the wage is not normalized, the non-linear system is squared with eight unknowns and eight equations and it yields a unique solution. On the other hand, when the wage is not normalized, I utilize the same set of eight equations. Though the number of unknown parameters is fewer than that of the equations, the system still yields a unique solution}.
+To solve the equilibrium allocations, I need $\boldsymbol{x}=(w_{j}, M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}, T_{i}, T_{j})$ be a vector of seven endogenous variables if the wage is normalized and $\boldsymbol{x}=(w_{i}, w_{j}, M^{u}_{i}, M^{u}_{j}, M^{d}_{i}, M^{d}_{j}, T_{i}, T_{j})$ be a vector of eight endogenous variables otherwise. The equilibrium constraints that I employ for optimizations are as follows\footnote{When the wage is not normalized, the non-linear system is squared with eight unknowns and eight equations and it yields a unique solution. On the other hand, when the wage is not normalized, I utilize the same set of eight equations. Though the number of unknown parameters is fewer than that of the equations, the system still yields a unique solution}.
 \begin{itemize}[ref=Step \arabic{enumi}, wide=0pt]
 \item Labor market clearing: $(LMC_{i}, LMC_{j})=\boldsymbol{0}$.
 \begin{equation}
@@ -156,7 +157,7 @@ BB_{i} &= T_{i} - \Sigma_{j\in\{H,F\}}[t^d_{ji}M^{d}_{j}c_{ji}p^{d}_{ji}+t^{u}_{
 
 I implement \lstinline{fsolve} in MATLAB as the numerical solver \footnote{Due to the restricted access to \lstinline{Knitro}.} with the $\boldsymbol{x} = \boldsymbol{(\sqrt{x}) ^ 2}$ technique to solve the equilibrium allocations. Here, I only report the results when the wage is normalized.
 
-The values for the eight params are
+The values for the seven endogenous params are
 \begin{align*}
 \begin{bmatrix}
 w_j
@@ -191,7 +192,7 @@ My Solutions & 0.4150 & 0.0367 & 0.4357 & 0.016 & 0.9383 & 0.0617 & 0.993 \\
 \hline\hline
 \end{tabular}
 \begin{flushleft}
-\scriptsize{\textit{Note:} This table contains summary statistics for the endogeneous aggregate variables relevant for the first order approximation around the zero tariff equilibrium. 
+\scriptsize{\textit{Notes:} This table contains summary statistics for the endogeneous aggregate variables relevant for the first order approximation around the zero tariff equilibrium. 
 
 $\Omega_{F, H}\equiv\frac{M^{u}_{F}M^{d}_{H}p^{u}_{F, H}x_{F, H}}{M^{d}_{H}(p^{d}_{H,F}c_{H,F}+p^{d}_{H,H}c_{H,H})}$ is the share of Home final-good revenue spend on intermediate input varieties from F. 
 
@@ -201,34 +202,101 @@ $\lambda^{d}_{H}\equiv\frac{M^{d}_{H}(p^{d}_{H,F}c_{H,F}+p^{d}_{H,H}c_{H,H})}{w_
 \end{flushleft}
 \end{table}
 
-\section{Minor Comments}
+\section{Optimal Tax Instruments}
 
-A few grammatical errors and typos in the April 24 draft are as follows.
+\subsection{Solving the Optimization}
 
-\begin{enumerate}[ref=Step \arabic{enumi}, wide=0pt]
-
-\item On page 6, it says “thus assuming that all firm’s output can used as either for final consumption or as an intermediate input”. It should be “[…] can be used as […]”.
-
-\item On page 36, the last sentence of the first paragraph begins with “Nota that”. It should be “Note that”.
-
-\item In equation (29) on page 36, the integration domain of $P^{u}_{ji}$ should be from $0$ to $M^{u}_{j}$ not to $M^{d}_{j}$.
-
-\item In equation (32) on page 37, the subscript of $c_{ji}$ is flipped. It should be $y^{d}_{i} = c_{ii} + tau^{d}_{ij}c_{ij}$.
-
-\item In equation (34) on page 37, the last term of $T_{i}$ should be $-v^{u}_{ij}M^{d}_{j}M^{u}_{i}x_{ij}p^{u}_{ij}$.
-
-\end{enumerate}
-
-To improve readability, I would suggest specifying on page 36 that
+To solve the optimal tax policies, there are two approaches.
 
 \begin{enumerate}[ref=Step \arabic{enumi}, wide=0pt]
 
-\item $\mu_u = \frac{\theta}{\theta-1}$ and $\mu_d = \frac{\sigma}{\sigma-1}$ in equation (26).
+\item Nested Fixed Point
 
-\item $\bar{\alpha^{s}} = \frac{1}{(\alpha^{s})^{\alpha^{s}}(1-\alpha^{s})^{1-\alpha_s}}$ where $s \in \{u, d\}$ in equation (26).
+For a given set of tax instruments, there exists an equilibrium characterized by the seven endogenous parameters, which can be obtained by the inner solver “fsolve”. The household utility in the home country is then a function of the taxes and computable by plugging the equilibrium parameters. In order to minimize the negative utility level \footnote{i.e. maximize the implied utility}, I use the outer solver "fmincon" with the domains of the taxes specified by the lower and upper bounds.
 
-\item $\alpha$ in equations (28) for $Q^{u}_{ij}$ and $\ell^{d}_{i}$is $\alpha^{d}$.
+\item Minimization with Constraints
+
+My primary focus is to use the "fmincon" method with the "equilibrium conditions" \footnote{e.g. labor market clearing, goods market clearing and budget balance} as the non-linear constraints. It requires to include both the seven endogenous parameters and the tax instruments as the unknowns.
+
+"fmincon", however, is easily stuck at the local minima for such a complicated optimization problem. I use the global optimization toolbox in MATLAB to address this problem. It searches for an optimal solution by using a local solver from multiple starting points, but the solution is not guaranteed to be the global optimum.
 
 \end{enumerate}
+
+\subsection{Results and Allocations}
+
+\begin{table}[H]
+\caption{\textbf{Comparison of Optimal Tax Instruments}}
+\label{tab:opt_tax}
+\begin{tabular}{lllllll}
+\hline\hline
+& \multicolumn{4}{c}{A. Tax Instruments} & \multicolumn{2}{c}{B. Welfare} \\
+& $t^{d}_{H}$ & $t^{u}_{H}$ & $v^{d}_{H}$ & $s^{u}_{H}$ & $U_{US}$ & $u_{RoW}$ \\
+\hline
+\multicolumn{7}{c}{Panel A: Table 5} \\
+\multicolumn{2}{l}{Zero-tariff Equilibrium} & & & & 0.0316 & 0.1022 \\
+Only Import Tariffs & 0.3913 & 0.2035 & & & 0.0318 & 0.1017 \\
+Import Tariffs + Dom. Subs. & 0.3392 & 0.0039 & & 0.2501 & 0.0323 & 0.1016 \\
+Full Tax Policy & 0.3404 & 0.0049 & 0.0014 & 0.2500 & 0.0323 & 0.1016 \\
+\multicolumn{7}{c}{Panel B: My Solution} \\
+\multicolumn{2}{l}{Zero-tariff Equilibrium} & & & & 0.0315 & 0.1022 \\
+Only Import Tariffs & 0.3911 & 0.2036 & & & 0.0318 & 0.1016 \\
+Import Tariffs + Dom. Subs. & 0.7155 & 0.6994 & & 0.0389 & 0.0318 & 0.1015 \\
+Full Tax Policy & 0.8642 & 0.2145 & 0.0001 & 0.0239 & 0.0318 & 0.1014 \\
+\hline\hline      
+\end{tabular}
+\begin{flushleft}
+\scriptsize{\textit{Notes:} For the equilibrium where only the home country imposes tariffs, 13 out of 51 local solver runs converged with a positive local solver exit flag. For the equilibrium where the home country has both import tariffs and domestic subsidies, 2 out of 27 local solver runs converged with a positive local solver exit flag.}
+\end{flushleft}
+\end{table}
+
+\begin{table}[H]
+\caption{\textbf{Equilibrium Allocations under Optimal Tax Instruments}}
+\label{tab:eqlm_tax}
+\begin{tabular}{lllll}
+\hline\hline
+ & Zero-tariff Equilibrium & Only Import Tariffs & Dom. Subs. & Full Tax Policy \\
+\hline
+$w_j$ & 0.1285 & 0.1110 & 0.0933 & 0.1029 \\
+$M^{u}_{i}$ & 0.0516 & 0.0505 & 0.0519 & 0.0505 \\
+$M^{u}_{j}$ & 0.1204 & 0.1211 & 0.1207 & 0.1218 \\
+$M^{d}_{i}$ & 0.0322 & 0.0326 & 0.0324 & 0.0330 \\
+$M^{d}_{j}$ & 0.0790 & 0.0786 & 0.0787 & 0.0782 \\
+$T_{i}$ & 3.25E-10 & 0.0073 & 0.0014 & 0.0024 \\
+$T_{j}$ & 3.62E-10 & 1.00E-06 & 1.00E-08 & 0.0001 \\
+\hline\hline     
+\end{tabular}
+\end{table}
+
+The four equilibria for the tax instruments and its corresponding allocations are shown in Table \ref{tab:opt_tax} and Table \ref{tab:eqlm_tax}. My solution for the optimal tariffs is almost identical to that in the draft, while the optimal subsidies are quite far from those reported in Table 5 of the paper. I am also not confident for the last two rows in Table \ref{tab:opt_tax} and the last two columns in Table \ref{tab:eqlm_tax}, as the optimization problem becomes formidable for "fmincon" with the increase of the number of unknown parameters. For example, the equilibrium where the home country implements both the import tariffs and the domestic subsidies is attained from 2 out of 27 local optimizations. The equilibrium where the full set of tax instruments is performed fails to converge with different initial guesses. 
+
+% \section{Minor Comments}
+
+% A few grammatical errors and typos in the April 24 draft are as follows.
+
+% \begin{enumerate}[ref=Step \arabic{enumi}, wide=0pt]
+
+% \item On page 6, it says “thus assuming that all firm’s output can used as either for final consumption or as an intermediate input”. It should be “[…] can be used as […]”.
+
+% \item On page 36, the last sentence of the first paragraph begins with “Nota that”. It should be “Note that”.
+
+% \item In equation (29) on page 36, the integration domain of $P^{u}_{ji}$ should be from $0$ to $M^{u}_{j}$ not to $M^{d}_{j}$.
+
+% \item In equation (32) on page 37, the subscript of $c_{ji}$ is flipped. It should be $y^{d}_{i} = c_{ii} + tau^{d}_{ij}c_{ij}$.
+
+% \item In equation (34) on page 37, the last term of $T_{i}$ should be $-v^{u}_{ij}M^{d}_{j}M^{u}_{i}x_{ij}p^{u}_{ij}$.
+
+% \end{enumerate}
+
+% To improve readability, I would suggest specifying on page 36 that
+
+% \begin{enumerate}[ref=Step \arabic{enumi}, wide=0pt]
+
+% \item $\mu_u = \frac{\theta}{\theta-1}$ and $\mu_d = \frac{\sigma}{\sigma-1}$ in equation (26).
+
+% \item $\bar{\alpha^{s}} = \frac{1}{(\alpha^{s})^{\alpha^{s}}(1-\alpha^{s})^{1-\alpha_s}}$ where $s \in \{u, d\}$ in equation (26).
+
+% \item $\alpha$ in equations (28) for $Q^{u}_{ij}$ and $\ell^{d}_{i}$is $\alpha^{d}$.
+
+% \end{enumerate}
 
 \end{document}

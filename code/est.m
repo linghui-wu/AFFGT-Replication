@@ -37,7 +37,6 @@ params.w_us = 1;
 % % T_i: x(6)^2, T_j: x(7)^2
 %
 % Set initial guesses and optimize
-if 1==0
 % rng("default");
 x0 = unifrnd(0, 1, [7, 1]);  % Vector of unknowns
 
@@ -53,7 +52,6 @@ disp(exitflag1); % 1: Equation solved. First-order optimality is small.
 disp(x_squared);
 % Calculates statistics around the zero-tariff equilibrium
 % disp(cal_stats(x_squared, params));
-end
 
 %% Solve for optimal tax instruments
 
@@ -63,7 +61,6 @@ end
 % M_u_i: x(2)^2, M_u_j: x(3)^2, M_d_i: x(4)^2, M_d_j: x(5)^2
 % T_i: x(6)^2, T_j: x(7)^2
 % t_u_ji: x(8)^2, t_d_ji: x(9)^2;
-if 1==2
 x0=unifrnd(0,1,[9,1]);
 opt2=optimoptions(@fmincon,"Display","off","Algorithm","SQP",...
     "MaxIterations", 2e3,"MaxFunctionEvaluations",2e3,...
@@ -80,7 +77,6 @@ xgs=run(gs,problem);
 disp("**********");
 display(f(xgs));
 display(xgs.^2);
-end
 % display(cal_stats(xgs.^2, params));
 
 % Optimal tariffs and domestic subsidy
@@ -90,7 +86,6 @@ end
 % T_i: x(6)^2, T_j: x(7)^2
 % t_u_ji: x(8)^2, t_d_ji: x(9)^2;
 % t_u_ii: -x(10)^2
-if 1==2
 x0=unifrnd(0,1,[10,1]);
 opt3=optimoptions(@fmincon,"Display","iter","Algorithm","interior-point",...
     "MaxIterations",1e4,"MaxFunctionEvaluations",1e4,...
@@ -107,7 +102,6 @@ gs2=GlobalSearch;
 xgs2=run(gs2,problem2);
 display(f2(xgs2));
 display(xgs2.^2);
-end
 
 % Optimal tax policy
 % 11 unknown params
@@ -116,7 +110,6 @@ end
 % T_i: x(6)^2, T_j: x(7)^2
 % t_u_ji: x(8)^2, t_d_ji: x(9)^2;
 % t_u_ii: -x(10)^2, v_d_ij: x(11)^2;
-if 1
 x0=unifrnd(0,1,[11,1]);
 opt4=optimoptions(@fmincon,"Display","final","Algorithm","interior-point",...
     "MaxIterations",1e4,"MaxFunctionEvaluations",1e4,...
@@ -133,9 +126,8 @@ gs3=GlobalSearch;
 xgs3=run(gs3,problem3);
 display(f3(xgs3));
 display(xgs3.^2);
-end
 
-%% Another way of solving the optimal tariffs problem
+%% Use nested fixed point to solve the optimal tariffs problem
 
 % Solve the zero-tariff equilibrium
 % t = zeros(1,8);
